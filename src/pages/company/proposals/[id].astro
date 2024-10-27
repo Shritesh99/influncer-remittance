@@ -1,0 +1,307 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { Icon } from 'astro-icon/components';
+
+const { id } = Astro.params;
+---
+
+<Layout title="Campaign Details">
+  <div class="space-y-6">
+    <!-- Campaign Details Header -->
+    <div id="campaign-header" class="bg-white rounded-lg shadow p-6">
+      <div class="animate-pulse">
+        <div class="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+        <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+      </div>
+    </div>
+
+    <!-- Proposals Section -->
+    <div class="bg-white rounded-lg shadow">
+      <div class="p-6 border-b">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold text-gray-900">Proposals</h2>
+          <div class="flex space-x-4">
+            <select
+              id="status-filter"
+              class="border border-gray-300 rounded-lg px-4 py-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="all">All Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="Completed">Completed</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
+      <div id="proposals-list" class="divide-y divide-gray-200">
+        <!-- Loading State -->
+        <div id="loading-state" class="flex justify-center items-center py-12">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accept Proposal Modal -->
+  <div
+    id="accept-modal"
+    class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center"
+  >
+    <div class="bg-white rounded-lg max-w-lg w-full mx-4">
+      <div class="p-6">
+        <h3 class="text-lg font-medium text-gray-900 mb-4">Accept Proposal</h3>
+        <div id="accept-modal-content" class="space-y-4">
+          <p class="text-gray-600">Are you sure you want to accept this proposal? This will:</p>
+          <ul class="list-disc list-inside text-gray-600 space-y-2">
+            <li>Lock the campaign budget for this proposal</li>
+            <li>Notify the influencer of acceptance</li>
+            <li>Begin the project timeline</li>
+          </ul>
+          <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+            <div class="flex items-center justify-between text-sm">
+              <span class="text-gray-500">Amount to be locked:</span>
+              <span id="modal-amount" class="font-medium text-gray-900"></span>
+            </div>
+            <div class="flex items-center justify-between text-sm mt-2">
+              <span class="text-gray-500">Timeline:</span>
+              <span id="modal-timeline" class="font-medium text-gray-900"></span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex justify-end space-x-3">
+          <button
+            id="modal-cancel"
+            class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+          >
+            Cancel
+          </button>
+          <button
+            id="modal-accept"
+            class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+          >
+            Accept Proposal
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>
+
+<template id="proposal-template">
+  <div class="p-6 hover:bg-gray-50">
+    <div class="flex items-start justify-between">
+      <div class="flex items-start space-x-4">
+        <div class="flex-shrink-0">
+          <div class="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center">
+            <Icon name="mdi:user" class="h-6 w-6 text-gray-400" />
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h3 class="text-sm font-medium text-gray-900 proposal-influencer"></h3>
+            <span class="proposal-status inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"></span>
+          </div>
+          <p class="mt-1 text-sm text-gray-500 proposal-amount"></p>
+          <p class="mt-1 text-sm text-gray-500 proposal-timeline"></p>
+          
+          <div class="mt-2">
+            <h4 class="text-sm font-medium text-gray-900">Deliverables:</h4>
+            <ul class="mt-1 list-disc list-inside text-sm text-gray-500 proposal-deliverables">
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <div class="proposal-actions flex space-x-2">
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+  import { ContractService } from '../../../services/contractService';
+  import { loadedPublicKey } from "../../../stellar-wallets-kit";
+
+  let publicKey = loadedPublicKey();
+  
+  let currentCampaign = null;
+  let currentProposals = [];
+  const campaignId = Number(window.location.pathname.split('/').pop());
+  
+  const contractService = new ContractService();
+
+  // Helper functions
+  const formatCurrency = (amount: bigint) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(Number(amount));
+  };
+
+  const formatTimeline = (days: number) => `${days} days`;
+
+  const getStatusStyle = (status: string) => {
+    const styles = {
+      Pending: 'bg-yellow-100 text-yellow-800',
+      Approved: 'bg-blue-100 text-blue-800',
+      Completed: 'bg-green-100 text-green-800',
+      Rejected: 'bg-red-100 text-red-800'
+    };
+    return styles[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Create campaign header
+  const createCampaignHeader = (campaign) => {
+    const header = document.getElementById('campaign-header');
+    header.innerHTML = `
+      <div class="flex items-start justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900">${campaign.title}</h1>
+          <p class="mt-1 text-gray-500">by ${campaign.organization}</p>
+          <div class="mt-4 flex items-center space-x-4">
+            <div class="flex items-center">
+              <Icon name="mdi:dollar" class="text-gray-400 mr-2" />
+              <span class="text-gray-900 font-medium">${formatCurrency(campaign.budget)}</span>
+            </div>
+            <div class="flex items-center">
+              <Icon name="mdi:clock" class="text-gray-400 mr-2" />
+              <span class="text-gray-900">${formatTimeline(campaign.deadline)}</span>
+            </div>
+          </div>
+        </div>
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+          getStatusStyle(campaign.status)
+        }">
+          ${campaign.status.tag}
+        </span>
+      </div>
+    `;
+  };
+
+  // Create proposal card
+  const createProposalCard = (proposal) => {
+    const template = document.getElementById('proposal-template') as HTMLTemplateElement;
+    const card = template.content.cloneNode(true) as DocumentFragment;
+    
+    card.querySelector('.proposal-influencer').textContent = proposal.influencer;
+    card.querySelector('.proposal-status').textContent = proposal.status.tag;
+    card.querySelector('.proposal-status').className += ` ${getStatusStyle(proposal.status)}`;
+    card.querySelector('.proposal-amount').textContent = `Budget: ${formatCurrency(proposal.amount)}`;
+    card.querySelector('.proposal-timeline').textContent = `Timeline: ${formatTimeline(proposal.timeline)}`;
+    
+    const deliverablesList = card.querySelector('.proposal-deliverables');
+    proposal.deliverables.forEach(deliverable => {
+      const li = document.createElement('li');
+      li.textContent = deliverable;
+      deliverablesList.appendChild(li);
+    });
+
+    // Add action buttons based on status
+    const actionsDiv = card.querySelector('.proposal-actions');
+    if (proposal.status.tag === 'Pending' && currentCampaign?.organization === publicKey) {
+      const acceptButton = document.createElement('button');
+      acceptButton.className = 'inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-blue-600 hover:bg-blue-700';
+      acceptButton.textContent = 'Accept';
+      acceptButton.onclick = () => showAcceptModal(proposal);
+      actionsDiv.appendChild(acceptButton);
+    }
+
+    return card;
+  };
+
+  // Show accept proposal modal
+  const showAcceptModal = (proposal) => {
+    const modal = document.getElementById('accept-modal');
+    const amountSpan = document.getElementById('modal-amount');
+    const timelineSpan = document.getElementById('modal-timeline');
+    
+    amountSpan.textContent = formatCurrency(proposal.amount);
+    timelineSpan.textContent = formatTimeline(proposal.timeline);
+    
+    modal.classList.remove('hidden');
+    
+    const acceptButton = document.getElementById('modal-accept');
+    const cancelButton = document.getElementById('modal-cancel');
+    
+    acceptButton.onclick = async () => {
+      try {
+        acceptButton.disabled = true;
+        acceptButton.textContent = 'Processing...';
+        
+        await contractService.approveProposal(proposal.id);
+        
+        // Refresh proposals list
+        await loadProposals();
+        modal.classList.add('hidden');
+      } catch (error) {
+        console.error('Error accepting proposal:', error);
+        alert('Error accepting proposal. Please try again.');
+      } finally {
+        acceptButton.disabled = false;
+        acceptButton.textContent = 'Accept Proposal';
+      }
+    };
+    
+    cancelButton.onclick = () => {
+      modal.classList.add('hidden');
+    };
+  };
+
+  // Load and display proposals
+  const loadProposals = async () => {
+    const proposalsList = document.getElementById('proposals-list');
+    proposalsList.innerHTML = '';
+    
+    try {
+      currentProposals = await contractService.getCampaignProposals(campaignId);
+      const statusFilter = (document.getElementById('status-filter') as HTMLSelectElement).value;
+      
+      const filteredProposals = statusFilter === 'all'
+        ? currentProposals
+        : currentProposals.filter(p => p.status === statusFilter);
+      
+      if (filteredProposals.length === 0) {
+        proposalsList.innerHTML = `
+          <div class="text-center py-12">
+            <p class="text-gray-500">No proposals found</p>
+          </div>
+        `;
+        return;
+      }
+      
+      filteredProposals.forEach(proposal => {
+        proposalsList.appendChild(createProposalCard(proposal));
+      });
+    } catch (error) {
+      console.error('Error loading proposals:', error);
+      proposalsList.innerHTML = `
+        <div class="text-center py-12">
+          <p class="text-red-500">Error loading proposals. Please try again.</p>
+        </div>
+      `;
+    }
+  };
+
+  // Initialize page
+  const init = async () => {
+    try {
+      // Load campaign details
+      currentCampaign = await contractService.getCampaign(campaignId);
+      createCampaignHeader(currentCampaign);
+      
+      // Set up status filter
+      const statusFilter = document.getElementById('status-filter') as HTMLSelectElement;
+      statusFilter.addEventListener('change', loadProposals);
+      
+      // Load initial proposals
+      await loadProposals();
+    } catch (error) {
+      console.error('Error initializing page:', error);
+    }
+  };
+
+  // Start initialization
+  init();
+</script>

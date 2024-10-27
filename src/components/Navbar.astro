@@ -11,7 +11,7 @@
           data-connect
           aria-controls="connect-wrap"
           class="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded transition duration-200"
-        ></button>
+        >Connet Wallet</button>
       </div>
     </div>
   </div>
@@ -30,6 +30,7 @@
 
 <script>
   import { kit, setPublicKey, loadedPublicKey } from "../stellar-wallets-kit";
+  import { IssuedAssetId, SigningKeypair, Wallet } from "@stellar/typescript-wallet-sdk";
 
   const ellipsis = document.querySelector("#connect-wrap .ellipsis");
   const button = document.querySelector("[data-connect]");
@@ -65,6 +66,60 @@
     const publicKey = loadedPublicKey();
     if(publicKey === undefined) return;
     setLoggedIn(publicKey);
+
+    // const webview = window.open("https://extmgxanchor.moneygram.com/stellarsepservice/sep24/transaction", "webview", "width=500,height=800");
+    // window.addEventListener("message", closeWebView);
+
+    // async function closeWebView(e) {
+    //   const wallet = Wallet.TestNet();
+
+    //   // Testnet
+    //   const MGI_ACCESS_HOST = "extmgxanchor.moneygram.com";
+    //   // Pubnet
+    //   // const MGI_ACCESS_HOST = "stellar.moneygram.com";
+
+    //   // First we create an anchor object with MoneyGram's home domain.
+    //   const anchor = wallet.anchor({ homeDomain: MGI_ACCESS_HOST });
+
+    //   // Then we create the sep10 object which handles all the athentication steps.
+    //   const sep10 = await anchor.sep10();
+
+    //   // Finally, we authenticate using the wallet's SIGNING_KEY secret.
+    //   const authKey = SigningKeypair.fromSecret("SAAMTG4VGBQOFD2U6FRDZT7FEJTKC73M4EXURHY44ROZ7HCWPE66BSDQ");
+    //   const authToken = await sep10.authenticate({ accountKp: authKey });
+    //   // First let's make sure Anchor supports the asset we want to withdraw.
+    //   const assetCode = "USDC";
+    //   const info = await anchor.getInfo();
+    //   const currency = info.currencies.find(({ code }) => code === assetCode);
+    //   if (!currency?.code || !currency?.issuer) {
+    //     throw new Error(
+    //       `Anchor does not support ${assetCode} asset or is not correctly configured on TOML file`,
+    //     );
+    //   }
+
+    //   // Use same "anchor" object from previous step.
+    //   const { url, id } = await anchor.sep24().withdraw({
+    //     authToken: authToken, // Use same "authToken" string from previous step
+    //     withdrawalAccount: FUNDS_STELLAR_KEYPAIR.public_key,
+    //     assetCode,
+    //     lang: "en", // "lang" is optional, defaults to "en" if ommited
+    //     extraFields: {
+    //       // "amount" is optional for non-custodial wallets and mandatory for custodial wallets
+    //       amount: "<amount to withdraw / cash-out>",
+    //     },
+    //   });
+    //   const txJson = e.data.transaction;
+    //   console.log(`Transaction ${txJson.id} is ${txJson.status}`);
+
+    //   // If we get a postMessage event and the transaction status is
+    //   // "pending_user_transfer_start" let's interpret that as a signal to close
+    //   // the webview window and take user back to the application experience
+    //   if (txJson.status === "pending_user_transfer_start") {
+    //     webview.close();
+    //   }
+    // }
   }
   init();
+
+  
 </script>

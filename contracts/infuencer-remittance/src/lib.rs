@@ -81,7 +81,13 @@ impl InfluencerPayment {
             deadline,
         };
 
-        let mut campaigns: Vec<Campaign> = env.storage().persistent().get(&DataKey::Campaigns).unwrap();
+        // Get existing campaigns or create new vector if none exist
+        let mut campaigns: Vec<Campaign> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Campaigns)
+            .unwrap_or_else(|| Vec::new(&env));
+
         campaigns.push_back(campaign.clone());
         env.storage().persistent().set(&DataKey::Campaigns, &campaigns);
 
@@ -117,7 +123,13 @@ impl InfluencerPayment {
             deliverables,
         };
 
-        let mut proposals: Vec<Proposal> = env.storage().persistent().get(&DataKey::Proposals).unwrap();
+        // Get existing proposals or create new vector if none exist
+        let mut proposals: Vec<Proposal> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Proposals)
+            .unwrap_or_else(|| Vec::new(&env));
+
         proposals.push_back(proposal.clone());
         env.storage().persistent().set(&DataKey::Proposals, &proposals);
 
@@ -125,36 +137,47 @@ impl InfluencerPayment {
     }
 
     // Organization approves a proposal and locks the payment
-    pub fn approve_proposal(env: Env, proposal_id: u32) {
-        let proposal = Self::get_proposal(&env, proposal_id);
-        let campaign = Self::get_campaign(&env, proposal.campaign_id);
+   pub fn approve_proposal(env: &Env, proposal_id: u32) {
+    // Get current state
+        let proposal = Self::get_proposal(env, proposal_id);
+        let campaign = Self::get_campaign(env, proposal.campaign_id);
         let token: Address = env.storage().persistent().get(&DataKey::Token).unwrap();
-        let token_client = token::Client::new(&env, &token);
+        let token_client = token::Client::new(env, &token);
         
+        // Require authorization from campaign organization
         campaign.organization.require_auth();
         
         // Lock the USDC payment
         token_client.transfer(
             &campaign.organization,
             &env.current_contract_address(),
-            &proposal.amount,
+            &proposal.amount
         );
 
         // Update proposal status
         let mut proposals: Vec<Proposal> = env.storage().persistent().get(&DataKey::Proposals).unwrap();
-        let index = proposals
-            .iter()
-            .position(|p| p.id == proposal_id)
-            .expect("Proposal not found") as u32;  // Convert usize to u32
+        let mut updated_proposals: Vec<Proposal> = Vec::new(env);
         
-        proposals.set(
-            index,
-            Proposal {
-                status: ProposalStatus::Approved,
-                ..proposal
-            },
-        );
-        env.storage().persistent().set(&DataKey::Proposals, &proposals);
+        // Create new vector with updated proposal
+        for p in proposals.iter() {
+            if p.id == proposal_id {
+                let updated_proposal = Proposal {
+                    id: p.id,
+                    campaign_id: p.campaign_id,
+                    influencer: p.influencer.clone(),
+                    amount: p.amount,
+                    status: ProposalStatus::Approved,
+                    deliverables: proposal.deliverables.clone(),
+                    timeline: proposal.timeline
+                };
+                updated_proposals.push_back(updated_proposal);
+            } else {
+                updated_proposals.push_back(p.clone());
+            }
+        }
+        
+        // Save the updated proposals
+        env.storage().persistent().set(&DataKey::Proposals, &updated_proposals);
     }
 
     // Organization confirms task completion and releases payment
@@ -214,8 +237,13 @@ impl InfluencerPayment {
     }
 
     // Helper functions
-    fn get_campaign(env: &Env, campaign_id: u32) -> Campaign {
-        let campaigns: Vec<Campaign> = env.storage().persistent().get(&DataKey::Campaigns).unwrap();
+    pub fn get_campaign(env: &Env, campaign_id: u32) -> Campaign {
+        let campaigns: Vec<Campaign> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Campaigns)
+            .unwrap_or_else(|| Vec::new(env));
+
         campaigns
             .iter()
             .find(|c| c.id == campaign_id)
@@ -223,7 +251,7 @@ impl InfluencerPayment {
             .clone()
     }
 
-    fn get_proposal(env: &Env, proposal_id: u32) -> Proposal {
+    pub fn get_proposal(env: &Env, proposal_id: u32) -> Proposal {
         let proposals: Vec<Proposal> = env.storage().persistent().get(&DataKey::Proposals).unwrap();
         proposals
             .iter()
@@ -233,14 +261,14 @@ impl InfluencerPayment {
     }
 
     // View functions
-    pub fn get_campaign_proposals(env: Env, campaign_id: u32) -> Vec<Proposal> {
+    pub fn get_campaign_proposals(env: &Env, campaign_id: u32) -> Vec<Proposal> {
         let proposals: Vec<Proposal> = env.storage().persistent().get(&DataKey::Proposals).unwrap();
-        let mut filtered = Vec::new(&env);
+        // Create a new vector with the environment reference
+        let mut filtered: Vec<Proposal> = Vec::new(env);
         
-        for i in 0..proposals.len() {
-            let proposal = proposals.get(i).unwrap();
+        for proposal in proposals.iter() {  // Use iter() for more idiomatic iteration
             if proposal.campaign_id == campaign_id {
-                filtered.push_back(proposal);
+                filtered.push_back(proposal.clone());  // Clone the proposal when pushing
             }
         }
         filtered
@@ -270,6 +298,26 @@ impl InfluencerPayment {
             }
         }
         active_campaigns
+    }
+
+    pub fn get_organization_campaigns(env: &Env, organization: Address) -> Vec<Campaign> {
+    // Get campaigns from storage with error handling
+        let campaigns: Vec<Campaign> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::Campaigns)
+            .unwrap_or_else(|| Vec::new(env));
+
+        let mut filtered: Vec<Campaign> = Vec::new(env);
+
+        // Filter for both organization and active status in one pass
+        for campaign in campaigns.iter() {
+            if campaign.organization == organization && matches!(campaign.status, CampaignStatus::Active) {
+                filtered.push_back(campaign.clone());
+            }
+        }
+
+        filtered
     }
 
 

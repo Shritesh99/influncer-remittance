@@ -12,8 +12,7 @@ const initialCampaigns = [];
     <div class="bg-white rounded-lg shadow p-6">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-2xl font-bold text-gray-900">Available Campaigns</h1>
-          <p class="text-gray-600">Find and apply to campaigns that match your profile</p>
+          <h1 class="text-2xl font-bold text-gray-900">Manage your influencer marketing campaigns</h1>
         </div>
         <div class="flex space-x-4">
           <div class="relative">
@@ -37,12 +36,18 @@ const initialCampaigns = [];
             <option value="highest-budget">Highest Budget</option>
             <option value="deadline">Deadline Soon</option>
           </select>
+          <button id="new-campaign"
+            class="inline-flex items-center p-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+            >
+            <Icon name="mdi:plus" class="h-4 w-4 mr-2" />
+            New Campaign
+         </button>
         </div>
       </div>
     </div>
 
     <!-- Campaigns Grid -->
-    <div id="campaigns-grid" class="grid grid-cols-1 md:grid-cols-1 xl:grid-cols-2 gap-6">
+    <div id="campaigns-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
       <!-- Loading State -->
       <div id="loading-state" class="col-span-full flex justify-center items-center py-12">
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
@@ -58,100 +63,98 @@ const initialCampaigns = [];
       <h3 class="mt-4 text-lg font-medium text-gray-900">No campaigns found</h3>
       <p class="mt-2 text-gray-500">Try adjusting your search or filters</p>
     </div>
+    
+    <!-- New Campaign Modal -->
 
-    <!-- Proposal Modal -->
-    <div
-      id="proposal-modal"
-      class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center"
-    >
-      <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative">
-        <div class="p-6">
-          <!-- Modal Header -->
-          <div class="flex items-center justify-between mb-6">
-            <div>
-              <h2 class="text-xl font-semibold text-gray-900">Submit Proposal</h2>
-              <p class="text-sm text-gray-500 mt-1" id="modal-campaign-title"></p>
-            </div>
-            <button
-              id="close-modal-btn"
-              class="text-gray-400 hover:text-gray-500 transition-colors"
-            >
-              <Icon name="mdi:close" class="h-6 w-6" />
-            </button>
-          </div>
-
-          <!-- Proposal Form -->
-          <form id="proposal-form" class="space-y-6">
-
-            <div>
-              <label for="timeline" class="block text-sm font-medium text-gray-700">
-                Timeline (days)
-              </label>
-              <input
-                type="text"
-                id="timeline"
-                name="timeline"
-                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                placeholder="e.g., 2 weeks"
-                required
-              />
-            </div>
-
-            <div>
-              <label for="budget" class="block text-sm font-medium text-gray-700">
-                Proposed Budget
-              </label>
-              <div class="mt-1 relative rounded-md shadow-sm">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span class="text-gray-500 sm:text-sm">$</span>
+        <div
+        id="proposal-modal"
+        class="hidden fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center"
+        >
+        <div class="bg-white rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto relative">
+            <div class="p-6">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                <h2 class="text-xl font-semibold text-gray-900">New Campaign</h2>
+                <p class="text-sm text-gray-500 mt-1" id="modal-campaign-title"></p>
                 </div>
+                <button
+                id="close-modal-btn"
+                class="text-gray-400 hover:text-gray-500 transition-colors"
+                >
+                <Icon name="mdi:close" class="h-6 w-6" />
+                </button>
+            </div>
+
+            <!-- Proposal Form -->
+            <form id="proposal-form" class="space-y-6">
+
+                <div>
+                <label for="title" class="block text-sm font-medium text-gray-700">
+                    Title
+                </label>
                 <input
-                  type="number"
-                  name="budget"
-                  id="budget"
-                  class="pl-7 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Deliverables</label>
-              <div id="deliverablesContainer" class="space-y-2">
-                <div class="flex gap-2">
-                  <input
                     type="text"
-                    name="deliverables[]"
+                    id="title"
+                    name="title"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="Some title"
                     required
-                    class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-                  />
-                  <button type="button" class="add-deliverable mt-1 p-2 text-blue-600 hover:text-blue-700">
-                    <Icon name="mdi:plus" class="h-5 w-5" />
-                  </button>
+                />
                 </div>
-              </div>
-            </div>
 
-            <div class="flex justify-end space-x-3">
-              <button
-                type="button"
-                id="cancel-proposal-btn"
-                class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Submit Proposal
-              </button>
+                <div>
+                <label for="budget" class="block text-sm font-medium text-gray-700">
+                    Budget
+                </label>
+                <div class="mt-1 relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500 sm:text-sm">$</span>
+                    </div>
+                    <input
+                    type="number"
+                    name="budget"
+                    id="budget"
+                    class="pl-7 block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="0.00"
+                    required
+                    />
+                </div>
+                </div>
+
+                <div>
+                <label for="deadline" class="block text-sm font-medium text-gray-700">
+                    Deadline (days)
+                </label>
+                <input
+                    type="text"
+                    id="deadline"
+                    name="deadline"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    placeholder="e.g., 2 weeks"
+                    required
+                />
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                <button
+                    type="button"
+                    id="cancel-proposal-btn"
+                    class="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    class="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                    Create Campaign
+                </button>
+                </div>
+            </form>
             </div>
-          </form>
         </div>
-      </div>
-      <div>
+    </div>
   </div>
 </Layout>
 
@@ -161,7 +164,7 @@ const initialCampaigns = [];
       <div class="flex items-start justify-between">
         <div>
           <h3 class="text-lg font-medium text-gray-900 campaign-title"></h3>
-          <p class="mt-1 text-sm text-gray-500 organization-name"></p>
+          <p class="mt-1 text-sm text-gray-500 organization-name text-ellipsis"></p>
         </div>
         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 campaign-status">
           Active
@@ -183,7 +186,7 @@ const initialCampaigns = [];
         <button
           class="submit-proposal-btn w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
-          Submit Proposal
+          View Proposals
         </button>
       </div>
     </div>
@@ -206,7 +209,8 @@ const initialCampaigns = [];
 
   // Helper function to format deadline
   const formatDeadline = (timestamp: number) => {
-    // const deadline = new Date(timestamp * 1000);
+    // console.log(timestamp)
+    // const deadline = new Date(timestamp);
     // const now = new Date();
     // const diffDays = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return `${timestamp} days left`;
@@ -216,99 +220,74 @@ const initialCampaigns = [];
   const createCampaignCard = (campaign: { id: any; title: string | null; organization: any; budget: bigint; deadline: number; }) => {
     const template = document.getElementById('campaign-card-template') as HTMLTemplateElement;
     const card = template.content.cloneNode(true) as DocumentFragment;
-    
     // Fill in campaign details
     card.querySelector('.campaign-title').textContent = campaign.title;
     card.querySelector('.organization-name').textContent = `by ${campaign.organization}`;
     card.querySelector('.campaign-budget').textContent = formatCurrency(campaign.budget);
     card.querySelector('.campaign-deadline').textContent = formatDeadline(campaign.deadline);
     
-    // Add click handler for proposal button
-    card.querySelector('.submit-proposal-btn').addEventListener('click', () => showProposalModal(campaign));
+     card.querySelector('.submit-proposal-btn').addEventListener('click', () => {
+        window.location.href = `/company/proposals/${campaign.id}`
+     });
     
     return card;
   };
 
-  document.querySelectorAll('.add-deliverable').forEach(button => {
-    button.addEventListener('click', () => {
-      const container = document.getElementById('deliverablesContainer');
-      const newDeliverable = document.createElement('div');
-      newDeliverable.className = 'flex gap-2';
-      newDeliverable.innerHTML = `
-        <input
-          type="text"
-          name="deliverables[]"
-          required
-          class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
-        />
-        <button type="button" class="remove-deliverable mt-1 p-2 text-red-600 hover:text-red-700">
-          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-          </svg>
-        </button>
-      `;
-      container?.appendChild(newDeliverable);
-    });
-  });
-  // Function to show proposal modal
-  const showProposalModal = (campaign: Campaign) => {
-    const modal = document.getElementById('proposal-modal');
-    const titleElement = document.getElementById('modal-campaign-title');
-    const budgetInput = document.getElementById('budget') as HTMLInputElement;
+  const button = document.getElementById("new-campaign");
+  button?.addEventListener('click',() => {
+        const modal = document.getElementById('proposal-modal');
+        const titleElement = document.getElementById('modal-campaign-title');
+        const budgetInput = document.getElementById('budget') as HTMLInputElement;
+
+        // Update modal content
+        titleElement.textContent = `New Campaign`;
+
+        // Show modal
+        modal.classList.remove('hidden');
+
+        // Setup close handlers
+        const closeModal = () => {
+        modal.classList.add('hidden');
+        (document.getElementById('proposal-form') as HTMLFormElement).reset();
+        };
+
+        // Close on background click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Close on button click
+        document.getElementById('close-modal-btn').addEventListener('click', closeModal);
+        document.getElementById('cancel-proposal-btn').addEventListener('click', closeModal);
+
+        // Handle form submission
+        const form = document.getElementById('proposal-form') as HTMLFormElement;
+        form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const title = formData.get('title') as string;
+        const buget = BigInt(formData.get('budget') as string);
+        const deadline = BigInt(formData.get('deadline') as string);
     
-    // Update modal content
-    titleElement.textContent = `for ${campaign.title}`;
-    
-    // Set max budget if needed
-    budgetInput.max = formatCurrency(campaign.budget)
-    
-    // Show modal
-    modal.classList.remove('hidden');
-    
-    // Setup close handlers
-    const closeModal = () => {
-      modal.classList.add('hidden');
-      (document.getElementById('proposal-form') as HTMLFormElement).reset();
-    };
-    
-    // Close on background click
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        closeModal();
-      }
-    });
-    
-    // Close on button click
-    document.getElementById('close-modal-btn').addEventListener('click', closeModal);
-    document.getElementById('cancel-proposal-btn').addEventListener('click', closeModal);
-    
-    // Handle form submission
-    const form = document.getElementById('proposal-form') as HTMLFormElement;
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const formData = new FormData(form);
-      const amount = BigInt(formData.get('budget') as string);
-      const timeline = BigInt(formData.get('timeline') as string);
-      const deliverables = formData.getAll('deliverables[]').map(d => d.toString());
-      
-      try {
-        const proposalId = await contractService.submitProposal(
-          campaign.id,
-          amount,
-          timeline,
-          deliverables
+
+        try {
+        const proposalId = await contractService.createCampaign(
+            title,
+            buget,
+            deadline
         );
         closeModal();
         // Show success message
         alert(`Proposal submitted successfully! Proposal ID: ${proposalId}`);
-      } catch (error) {
+        } catch (error) {
         console.error('Error submitting proposal:', error);
         alert('Error submitting proposal. Please try again.');
-      }
+        }
+        });
     });
-  };
-
   // Function to filter and sort campaigns
   const filterCampaigns = (searchTerm: string, filterValue: string) => {
     let filtered = [...campaignsData];
@@ -359,7 +338,7 @@ const initialCampaigns = [];
   const init = async () => {
     try {
       // Fetch active campaigns from the contract
-      campaignsData = await contractService.getActiveCampaigns();
+      campaignsData = await contractService.getActiveCampaignsForOrg();
       
       // Set up search and filter handlers
       const searchInput = document.getElementById('search') as HTMLInputElement;
