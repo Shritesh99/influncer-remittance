@@ -85,7 +85,7 @@
     //   const sep10 = await anchor.sep10();
 
     //   // Finally, we authenticate using the wallet's SIGNING_KEY secret.
-    //   const authKey = SigningKeypair.fromSecret("SAAMTG4VGBQOFD2U6FRDZT7FEJTKC73M4EXURHY44ROZ7HCWPE66BSDQ");
+    //   const authKey = SigningKeypair.fromSecret("");
     //   const authToken = await sep10.authenticate({ accountKp: authKey });
     //   // First let's make sure Anchor supports the asset we want to withdraw.
     //   const assetCode = "USDC";
@@ -117,7 +117,7 @@
     //   if (txJson.status === "pending_user_transfer_start") {
     //     webview.close();
     //   }
-    // }
+    }
   }
   init();
 
