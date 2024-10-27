@@ -259,6 +259,19 @@ impl InfluencerPayment {
         filtered
     }
 
+    pub fn get_active_campaigns(env: Env) -> Vec<Campaign> {
+        let campaigns: Vec<Campaign> = env.storage().persistent().get(&DataKey::Campaigns).unwrap();
+        let mut active_campaigns = Vec::new(&env);
+        
+        for i in 0..campaigns.len() {
+            let campaign = campaigns.get(i).unwrap();
+            if matches!(campaign.status, CampaignStatus::Active) {
+                active_campaigns.push_back(campaign);
+            }
+        }
+        active_campaigns
+    }
+
 
     fn count_remaining_proposals(env: &Env, campaign_id: u32) -> u32 {
         let proposals: Vec<Proposal> = env.storage().persistent().get(&DataKey::Proposals).unwrap();

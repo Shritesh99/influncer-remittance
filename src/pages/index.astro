@@ -3,6 +3,7 @@ import Layout from "../layouts/Layout.astro";
 import Card from "../components/Card.astro";
 import helloWorld from "../contracts/hello_world";
 const { result } = await helloWorld.hello({ to: "you" });
+import ConnectWallet from '../components/ConnectWallet.astro'
 const greeting = result.join(" ");
 ---
 
@@ -66,6 +67,7 @@ const greeting = result.join(" ");
 		</ul>
 	</main>
 </Layout>
+<ConnectWallet />
 
 <style>
 	main {

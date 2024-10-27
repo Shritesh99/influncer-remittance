@@ -1,0 +1,165 @@
+---
+import { Icon } from 'astro-icon/components'
+
+interface Props {
+  campaignId: number;
+  campaignTitle: string;
+  maxBudget: number;
+}
+
+const { campaignId, campaignTitle, maxBudget } = Astro.props;
+---
+<div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <!--
+    Background backdrop, show/hide based on modal state.
+
+    Entering: "ease-out duration-300"
+      From: "opacity-0"
+      To: "opacity-100"
+    Leaving: "ease-in duration-200"
+      From: "opacity-100"
+      To: "opacity-0"
+  -->
+  <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+
+  <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+    <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+      <!--
+        Modal panel, show/hide based on modal state.
+
+        Entering: "ease-out duration-300"
+          From: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+          To: "opacity-100 translate-y-0 sm:scale-100"
+        Leaving: "ease-in duration-200"
+          From: "opacity-100 translate-y-0 sm:scale-100"
+          To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+      -->
+      <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+      <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Submit Proposal for {campaignTitle}</h3>
+  
+  <form id="proposalForm" class="space-y-4">
+    <input type="hidden" name="campaignId" value={campaignId} />
+    
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Proposed Amount (USDC)</label>
+      <div class="mt-1 relative rounded-md shadow-sm">
+        <input
+          type="number"
+          name="amount"
+          max={maxBudget}
+          required
+          class="focus:ring-blue-500 focus:border-blue-500 block w-full pl-3 pr-12 sm:text-sm border-gray-300 rounded-md"
+        />
+        <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+          <span class="text-gray-500 sm:text-sm">USDC</span>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Timeline (days)</label>
+      <input
+        type="number"
+        name="timeline"
+        required
+        class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+      />
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700">Deliverables</label>
+      <div id="deliverablesContainer" class="space-y-2">
+        <div class="flex gap-2">
+          <input
+            type="text"
+            name="deliverables[]"
+            required
+            class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+          />
+          <button type="button" class="add-deliverable mt-1 p-2 text-blue-600 hover:text-blue-700">
+            <Icon name="mdi:plus" class="h-5 w-5" />
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-end">
+      <button
+        type="submit"
+        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+      >
+        Submit Proposal
+      </button>
+    </div>
+  </form>
+</div>
+      </div>
+      </div>
+      </div>
+      </div>
+      </div>
+
+<script>
+  import { ContractService } from '../../../services/contractService';
+
+  const contractService = new ContractService();
+  // Handle adding deliverables
+  document.querySelectorAll('.add-deliverable').forEach(button => {
+    button.addEventListener('click', () => {
+      const container = document.getElementById('deliverablesContainer');
+      const newDeliverable = document.createElement('div');
+      newDeliverable.className = 'flex gap-2';
+      newDeliverable.innerHTML = `
+        <input
+          type="text"
+          name="deliverables[]"
+          required
+          class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+        />
+        <button type="button" class="remove-deliverable mt-1 p-2 text-red-600 hover:text-red-700">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+        </button>
+      `;
+      container?.appendChild(newDeliverable);
+    });
+  });
+
+  // Handle removing deliverables
+  document.addEventListener('click', (e) => {
+    if ((e.target as Element).closest('.remove-deliverable')) {
+      (e.target as Element).closest('.flex')?.remove();
+    }
+  });
+
+  // Handle form submission
+  document.getElementById('proposalForm')?.addEventListener('submit', async (e) => {
+
+
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+
+    try {
+      const campaignId = Number(formData.get('campaignId'));
+      const amount = BigInt(formData.get('amount') as string);
+      const timeline = BigInt(formData.get('timeline') as string);
+      const deliverables = formData.getAll('deliverables[]').map(d => d.toString());
+
+      const proposalId = await contractService.submitProposal(
+        campaignId,
+        amount,
+        timeline,
+        deliverables
+      );
+      // Show success message
+      alert(`Proposal submitted successfully! Proposal ID: ${proposalId}`);
+      form.reset();
+    } catch (error) {
+      console.error('Error submitting proposal:', error);
+      alert('Error submitting proposal. Please try again.');
+    }
+  });
+</script>

@@ -1,0 +1,79 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import StatsCard from '../../components/company/StatusCard.astro';
+import CampaignChart from '../../components/company/CampaignChart.astro';
+import ActiveCampaigns from '../../components/company/ActiveCampaigns.astro';
+import PendingProposals from '../../components/company/PendingProposals.astro';
+import { Icon } from 'astro-icon/components'
+
+// This would come from your contract in production
+const stats = [
+  {
+    title: "Active Campaigns",
+    value: "5",
+    icon: "mdi:megaphone",
+    trend: "+2 this month",
+    color: "blue"
+  },
+  {
+    title: "Total Budget (USDC)",
+    value: "25,000",
+    icon: "mdi:dollar",
+    trend: "+8.2% vs last month",
+    color: "green"
+  },
+  {
+    title: "Pending Proposals",
+    value: "12",
+    icon: "mdi:file-text",
+    trend: "4 need review",
+    color: "yellow"
+  },
+  {
+    title: "Completed Tasks",
+    value: "8",
+    icon: "mdi:check-circle",
+    trend: "93% success rate",
+    color: "purple"
+  }
+];
+---
+
+<Layout title="Dashboard">
+  <div class="space-y-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-gray-900">Company Dashboard</h1>
+      <div class="flex space-x-4">
+        <button
+          class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+        >
+          <Icon name="mdi:download" class="h-4 w-4 mr-2" />
+          Export Report
+        </button>
+        <button
+          class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+        >
+          <Icon name="mdi:plus" class="h-4 w-4 mr-2" />
+          New Campaign
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {stats.map((stat) => <StatsCard {...stat} />)}
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <CampaignChart />
+      <ActiveCampaigns />
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <PendingProposals />
+    </div>
+  </div>
+</Layout>

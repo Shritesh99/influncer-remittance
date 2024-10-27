@@ -1,0 +1,49 @@
+---
+import { Icon } from 'astro-icon/components'
+---
+
+
+<aside class="w-64 bg-white shadow-md hidden lg:block">
+    <div class="h-full flex flex-col">
+        <nav class="flex-1 px-4 space-y-2 py-4">
+            <a href="/influencer" class="flex items-center px-4 py-2 text-gray-700 bg-gray-100 rounded-lg">
+                <span class="mr-3">
+                    <Icon name="mdi:home" />
+                </span>
+                Dashboard
+            </a>
+            <a href="/influencer/campaigns" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <span class="mr-3">
+                    <Icon name="mdi:megaphone" class="h-5 w-5" />
+                </span>
+                Campaigns
+            </a>
+            <a href="/influencer/proposals" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <span class="mr-3">
+                    <Icon name="mdi:file-text" class="h-5 w-5" />
+                </span>
+                Proposals
+            </a>
+            <a href="/influencer/earnings" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <span class="mr-3">
+                    <Icon name="mdi:dollar" class="h-5 w-5" />
+                </span>
+                Earnings
+            </a>
+            <a href="/influencer/profile" class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
+                <span class="mr-3">
+                    <Icon name="mdi:user" class="h-5 w-5" />
+                </span>
+                Profile
+            </a>
+        </nav>
+        <div class="p-4 border-t">
+            <button class="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg w-full">
+                <span class="mr-3">
+                    <Icon name="mdi:log-out" class="h-5 w-5" />
+                </span>
+                Logout
+            </button>
+        </div>
+    </div>
+</aside>

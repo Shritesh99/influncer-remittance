@@ -1,0 +1,53 @@
+---
+import { Icon } from 'astro-icon/components'
+const campaigns = [
+  {
+    id: 1,
+    title: "Q2 Instagram Campaign",
+    budget: 5000,
+    proposals: 3,
+    status: "active",
+    deadline: "2024-06-30"
+  },
+  {
+    id: 2,
+    title: "Summer TikTok Promotion",
+    budget: 3500,
+    proposals: 2,
+    status: "active",
+    deadline: "2024-07-15"
+  }
+];
+---
+
+<div class="bg-white rounded-lg shadow">
+  <div class="p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Active Campaigns</h3>
+    <div class="space-y-4">
+      {campaigns.map((campaign) => (
+        <div class="border rounded-lg p-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-medium text-gray-900">{campaign.title}</h4>
+              <p class="text-sm text-gray-500 mt-1">
+                Budget: {campaign.budget} USDC • {campaign.proposals} Proposals
+              </p>
+            </div>
+            <span class="px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
+              Active
+            </span>
+          </div>
+          <div class="mt-4 flex items-center text-sm text-gray-500">
+            <Icon name="mdi:calendar" class="h-4 w-4 mr-1" />
+            Deadline: {campaign.deadline}
+          </div>
+        </div>
+      ))}
+    </div>
+    <div class="mt-4">
+      <a href="/campaigns" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+        View all campaigns →
+      </a>
+    </div>
+  </div>
+</div>

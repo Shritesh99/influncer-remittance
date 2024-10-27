@@ -1,0 +1,56 @@
+---
+import { Icon } from 'astro-icon/components'
+const proposals = [
+  {
+    id: 1,
+    campaign: "Q2 Instagram Campaign",
+    influencer: "alice.stellar",
+    amount: 1500,
+    deliverables: ["3 Posts", "2 Stories"],
+    submitted: "2024-05-15"
+  },
+  {
+    id: 2,
+    campaign: "Summer TikTok Promotion",
+    influencer: "bob.stellar",
+    amount: 2000,
+    deliverables: ["5 Videos"],
+    submitted: "2024-05-14"
+  }
+];
+---
+
+<div class="bg-white rounded-lg shadow">
+  <div class="p-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Pending Proposals</h3>
+    <div class="space-y-4">
+      {proposals.map((proposal) => (
+        <div class="border rounded-lg p-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <h4 class="font-medium text-gray-900">{proposal.influencer}</h4>
+              <p class="text-sm text-gray-500 mt-1">
+                {proposal.campaign} • {proposal.amount} USDC
+              </p>
+            </div>
+            <button class="px-3 py-1 rounded-md text-sm font-medium bg-blue-100 text-blue-700 hover:bg-blue-200">
+              Review
+            </button>
+          </div>
+          <div class="mt-2">
+            <p class="text-sm text-gray-600">Deliverables: {proposal.deliverables.join(", ")}</p>
+          </div>
+          <div class="mt-2 text-sm text-gray-500">
+            <Icon name="mdi:clock" class="h-4 w-4 inline mr-1" />
+            Submitted: {proposal.submitted}
+          </div>
+        </div>
+      ))}
+    </div>
+    <div class="mt-4">
+      <a href="/proposals" class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+        View all proposals →
+      </a>
+    </div>
+  </div>
+</div>

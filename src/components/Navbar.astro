@@ -1,0 +1,70 @@
+<nav class="bg-gray-900 text-white p-4 shadow-md">
+  <div class="container mx-auto flex justify-between items-center">
+    <!-- Logo Section -->
+    <a href="#" class="text-lg font-semibold">My Remit</a>
+
+    <!-- Right Section with Connect Wallet -->
+    <div id="connect-wrap" class="wrap flex items-center space-x-4" aria-live="polite">
+      <div class="ellipsis text-gray-300">
+        <!-- Initial Button -->
+         <button
+          data-connect
+          aria-controls="connect-wrap"
+          class="bg-purple-600 hover:bg-purple-700 text-white font-medium px-4 py-2 rounded transition duration-200"
+        ></button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<style>
+  /* Additional custom styles */
+  .wrap {
+    text-align: center;
+  }
+
+  .ellipsis {
+    margin: auto;
+  }
+</style>
+
+<script>
+  import { kit, setPublicKey, loadedPublicKey } from "../stellar-wallets-kit";
+
+  const ellipsis = document.querySelector("#connect-wrap .ellipsis");
+  const button = document.querySelector("[data-connect]");
+
+  async function setLoggedIn(publicKey) {
+    ellipsis.innerHTML = `Signed in as ${publicKey}`;
+    ellipsis.title = publicKey;
+  }
+
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+
+    try {
+      await kit.openModal({
+        onWalletSelected: async (option) => {
+          try {
+            kit.setWallet(option.id);
+            const { address } = await kit.getAddress();
+            setPublicKey(address);
+            await setLoggedIn(address);
+          } catch (e) {
+            console.error(e);
+          }
+        },
+      });
+    } catch (e) {
+      console.error(e);
+    }
+
+    button.disabled = false;
+  });
+  const init = () => {
+    const publicKey = loadedPublicKey();
+    if(publicKey === undefined) return;
+    setLoggedIn(publicKey);
+  }
+  init();
+</script>

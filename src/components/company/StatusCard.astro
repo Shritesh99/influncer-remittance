@@ -1,0 +1,33 @@
+---
+import { Icon } from 'astro-icon/components'
+interface Props {
+  title: string;
+  value: string;
+  icon: string;
+  trend: string;
+  color: string;
+}
+
+const { title, value, icon, trend, color } = Astro.props;
+
+const colorClasses = {
+  blue: "bg-blue-50 text-blue-700",
+  green: "bg-green-50 text-green-700",
+  yellow: "bg-yellow-50 text-yellow-700",
+  purple: "bg-purple-50 text-purple-700"
+};
+---
+
+<div class="bg-white rounded-lg shadow p-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <p class="text-sm font-medium text-gray-600">{title}</p>
+      <p class="mt-1 text-3xl font-semibold text-gray-900">{value}</p>
+    </div>
+    <div class={`p-3 rounded-full ${colorClasses[color]}`}>
+      <Icon name={icon} class="h-6 w-6" />
+       {icon}
+    </div>
+  </div>
+  <p class="mt-4 text-sm text-gray-600">{trend}</p>
+</div>
